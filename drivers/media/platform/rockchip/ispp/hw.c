@@ -344,6 +344,7 @@ static int rkispp_hw_probe(struct platform_device *pdev)
 
 	rkispp_register_fec(hw_dev);
 	pm_runtime_enable(&pdev->dev);
+
 	return platform_driver_register(&rkispp_plat_drv);
 err:
 	return ret;
