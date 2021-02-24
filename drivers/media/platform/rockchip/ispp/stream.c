@@ -2196,7 +2196,8 @@ static void restart_module(struct rkispp_device *dev)
 		if (!completion_done(&monitor->fec.cmpl))
 			complete(&monitor->fec.cmpl);
 	}
-	writel(val, base + RKISPP_CTRL_STRT);
+	if (!dev->hw_dev->is_shutdown)
+		writel(val, base + RKISPP_CTRL_STRT);
 	monitor->is_restart = false;
 	monitor->restart_module = 0;
 end:
@@ -2227,7 +2228,8 @@ static void restart_monitor(struct work_struct *work)
 		if (!(monitor->monitoring_module & m_monitor->module) ||
 		    ret || !monitor->is_en)
 			continue;
-
+		if (dev->hw_dev->is_shutdown)
+			break;
 		v4l2_dbg(1, rkispp_debug, &dev->v4l2_dev,
 			 "module:0x%x wait %ldms timeout ret:%d, monitoring:0x%x\n",
 			 m_monitor->module, time, ret, monitor->monitoring_module);
@@ -2412,7 +2414,9 @@ static void fec_work_event(struct rkispp_device *dev,
 			offset += size;
 			reg_buf->reg_size = offset;
 		}
-		writel(FEC_ST, base + RKISPP_CTRL_STRT);
+
+		if (!dev->hw_dev->is_shutdown)
+			writel(FEC_ST, base + RKISPP_CTRL_STRT);
 		vdev->fec.is_end = false;
 	}
 restart_unlock:
@@ -2650,7 +2654,8 @@ static void nr_work_event(struct rkispp_device *dev,
 			offset += size;
 			reg_buf->reg_size = offset;
 		}
-		if (!is_quick)
+
+		if (!is_quick && !dev->hw_dev->is_shutdown)
 			writel(NR_SHP_ST, base + RKISPP_CTRL_STRT);
 		vdev->nr.is_end = false;
 	}
@@ -2906,7 +2911,9 @@ static void tnr_work_event(struct rkispp_device *dev,
 			offset += size;
 			reg_buf->reg_size = offset;
 		}
-		writel(TNR_ST, base + RKISPP_CTRL_STRT);
+
+		if (!dev->hw_dev->is_shutdown)
+			writel(TNR_ST, base + RKISPP_CTRL_STRT);
 		vdev->tnr.is_end = false;
 	}
 
@@ -3031,6 +3038,9 @@ void rkispp_module_work_event(struct rkispp_device *dev,
 			      u32 module, bool is_isr)
 {
 	bool is_fec_en = (dev->stream_vdev.module_ens & ISPP_MODULE_FEC);
+
+	if (dev->hw_dev->is_shutdown)
+		return;
 
 	if (dev->ispp_sdev.state != ISPP_STOP) {
 		if (module & ISPP_MODULE_TNR)
