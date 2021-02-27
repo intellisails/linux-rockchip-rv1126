@@ -4,7 +4,7 @@
  */
 
 /dts-v1/;
-#include "rv1109.dtsi"
+#include "rv1126.dtsi"
 #include "rv1126-ipc.dtsi"
 
 / {
