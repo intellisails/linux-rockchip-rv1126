@@ -615,6 +615,7 @@
 			mode-ums = <BOOT_UMS>;
 			mode-panic = <BOOT_PANIC>;
 			mode-watchdog = <BOOT_WATCHDOG>;
+			mode-dfu = <BOOT_DFU_DOWNLOAD>;
 		};
 	};
 
