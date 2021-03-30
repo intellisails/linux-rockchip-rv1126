@@ -1045,6 +1045,9 @@ static void rkispp_start_3a_run(struct rkispp_device *dev)
 	};
 	int ret;
 
+	if (!params_vdev->is_subs_evt)
+		return;
+
 	v4l2_event_queue(vdev, &ev);
 	ret = wait_event_timeout(dev->sync_onoff,
 			params_vdev->streamon && !params_vdev->first_params,
@@ -1065,6 +1068,9 @@ static void rkispp_stop_3a_run(struct rkispp_device *dev)
 		.type = CIFISP_V4L2_EVENT_STREAM_STOP,
 	};
 	int ret;
+
+	if (!params_vdev->is_subs_evt)
+		return;
 
 	v4l2_event_queue(vdev, &ev);
 	ret = wait_event_timeout(dev->sync_onoff, !params_vdev->streamon,
