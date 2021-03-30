@@ -2102,11 +2102,13 @@ void dwc3_gadget_enable_irq(struct dwc3 *dwc)
 			DWC3_DEVTEN_WKUPEVTEN |
 			DWC3_DEVTEN_CONNECTDONEEN |
 			DWC3_DEVTEN_USBRSTEN |
-			DWC3_DEVTEN_DISCONNEVTEN |
-			DWC3_DEVTEN_EOPFEN);
+			DWC3_DEVTEN_DISCONNEVTEN);
 
 	if (dwc->revision < DWC3_REVISION_250A)
 		reg |= DWC3_DEVTEN_ULSTCNGEN;
+
+	if (dwc->uwk_en)
+		reg |= DWC3_DEVTEN_EOPFEN;
 
 	dwc3_writel(dwc->regs, DWC3_DEVTEN, reg);
 }
@@ -3353,7 +3355,7 @@ static void dwc3_gadget_interrupt(struct dwc3 *dwc,
 		dwc3_gadget_conndone_interrupt(dwc);
 		break;
 	case DWC3_DEVICE_EVENT_WAKEUP:
-		dev_info(dwc->dev, "device wakeup\n");
+		dev_dbg(dwc->dev, "device wakeup\n");
 		dwc3_gadget_wakeup_interrupt(dwc, event->event_info);
 		break;
 	case DWC3_DEVICE_EVENT_HIBER_REQ:
@@ -3373,7 +3375,7 @@ static void dwc3_gadget_interrupt(struct dwc3 *dwc,
 			 * Ignore suspend event until the gadget enters into
 			 * USB_STATE_CONFIGURED state.
 			 */
-			dev_info(dwc->dev, "device suspend\n");
+			dev_dbg(dwc->dev, "device suspend\n");
 			if (dwc->gadget.state >= USB_STATE_CONFIGURED)
 				dwc3_gadget_suspend_interrupt(dwc,
 						event->event_info);
