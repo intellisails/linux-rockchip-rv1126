@@ -1685,21 +1685,7 @@ static void rkisp_buf_queue(struct vb2_buffer *vb)
 		rkisp_bridge_sendtopp_buffer(stream->ispdev, stream->ispdev->dev_id, vb->index);
 
 	spin_lock_irqsave(&stream->vbq_lock, lock_flags);
-
-	/* XXX: replace dummy to speed up  */
-	if (stream->streaming &&
-	    !stream->next_buf &&
-	    !stream->interlaced &&
-	    stream->id != RKISP_STREAM_DMATX0 &&
-	    stream->id != RKISP_STREAM_DMATX1 &&
-	    stream->id != RKISP_STREAM_DMATX2 &&
-	    stream->id != RKISP_STREAM_DMATX3 &&
-	    atomic_read(&stream->ispdev->isp_sdev.frm_sync_seq) == 0) {
-		stream->next_buf = ispbuf;
-		stream->ops->update_mi(stream);
-	} else {
-		list_add_tail(&ispbuf->queue, &stream->buf_queue);
-	}
+	list_add_tail(&ispbuf->queue, &stream->buf_queue);
 	spin_unlock_irqrestore(&stream->vbq_lock, lock_flags);
 }
 
@@ -2121,20 +2107,7 @@ void rkisp_spbuf_queue(struct rkisp_stream *stream, struct rkisp_buffer *sp_buf)
 	unsigned long lock_flags = 0;
 
 	spin_lock_irqsave(&stream->vbq_lock, lock_flags);
-	/* XXX: replace dummy to speed up  */
-	if (stream->streaming &&
-	    !stream->next_buf &&
-	    !stream->interlaced &&
-	    stream->id != RKISP_STREAM_DMATX0 &&
-	    stream->id != RKISP_STREAM_DMATX1 &&
-	    stream->id != RKISP_STREAM_DMATX2 &&
-	    stream->id != RKISP_STREAM_DMATX3 &&
-	    atomic_read(&stream->ispdev->isp_sdev.frm_sync_seq) == 0) {
-		stream->next_buf = sp_buf;
-		stream->ops->update_mi(stream);
-	} else {
-		list_add_tail(&sp_buf->queue, &stream->buf_queue);
-	}
+	list_add_tail(&sp_buf->queue, &stream->buf_queue);
 	spin_unlock_irqrestore(&stream->vbq_lock, lock_flags);
 }
 
