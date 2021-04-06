@@ -269,7 +269,7 @@ static int sfc_nand_block_protect1(u32 addr)
 	else if (addr < 0xE000)
 		status = 5 << 3 | 0 << 2 | 1 << 1;
 	else if (addr < 0xF800)
-		status = 3 << 3 | 0 << 2 | 1 << 1;
+		status = 4 << 3 | 0 << 2 | 1 << 1;
 	else if (addr < 0xFC00)
 		status = 2 << 3 | 0 << 2 | 1 << 1;
 	else
