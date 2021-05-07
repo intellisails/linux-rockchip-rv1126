@@ -119,6 +119,6 @@
 	status = "disabled";
 };
 
-&rkisp_vir1 {
+&rkisp_vir0 {
 	memory-region-thunderboot = <&rkisp_thunderboot>;
 };
