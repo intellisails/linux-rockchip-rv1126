@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0 */
 
-
+#define pr_fmt(fmt) "rga2_mmu: " fmt
 #include <linux/version.h>
 #include <linux/init.h>
 #include <linux/module.h>
@@ -45,7 +45,7 @@ void rga2_dma_flush_range(void *pstart, void *pend)
 
 dma_addr_t rga2_dma_flush_page(struct page *page, int map)
 {
-	dma_addr_t paddr = 0;
+	dma_addr_t paddr;
 
 	/*
 	 * Through dma_map_page to ensure that the physical address
@@ -64,6 +64,10 @@ dma_addr_t rga2_dma_flush_page(struct page *page, int map)
 		case MMU_MAP_CLEAN | MMU_MAP_INVALID:
 			paddr = dma_map_page(rga2_drvdata->dev, page, 0,
 					     PAGE_SIZE, DMA_BIDIRECTIONAL);
+			break;
+		default:
+			paddr = 0;
+			pr_err("unknown map cmd 0x%x\n", map);
 			break;
 		}
 
@@ -84,13 +88,16 @@ dma_addr_t rga2_dma_flush_page(struct page *page, int map)
 			dma_unmap_page(rga2_drvdata->dev, paddr,
 				       PAGE_SIZE, DMA_BIDIRECTIONAL);
 			break;
+		default:
+			pr_err("unknown map cmd 0x%x\n", map);
+			break;
 		}
 
 		return paddr;
 	}
 
 	pr_err("RGA2 failed to flush page, map= %x\n", map);
-	return paddr;
+	return 0;
 }
 
 #if 0
