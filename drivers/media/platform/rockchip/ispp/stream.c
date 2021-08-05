@@ -1191,9 +1191,6 @@ static int config_modules(struct rkispp_device *dev)
 {
 	int ret;
 
-	if (dev->inp == INP_ISP)
-		rkispp_start_3a_run(dev);
-
 	v4l2_dbg(1, rkispp_debug, &dev->v4l2_dev,
 		 "stream module ens:0x%x\n", dev->stream_vdev.module_ens);
 	dev->stream_vdev.monitor.monitoring_module = 0;
@@ -1252,6 +1249,7 @@ static int start_ii(struct rkispp_stream *stream)
 static int config_ii(struct rkispp_stream *stream)
 {
 	stream->is_cfg = true;
+	rkispp_start_3a_run(stream->isppdev);
 	return config_modules(stream->isppdev);
 }
 
@@ -1663,8 +1661,7 @@ static void rkispp_stream_stop(struct rkispp_stream *stream)
 	stream->stopping = true;
 	if (atomic_read(&dev->stream_vdev.refcnt) == 1) {
 		v4l2_subdev_call(&dev->ispp_sdev.sd, video, s_stream, false);
-		if (dev->inp == INP_ISP)
-			rkispp_stop_3a_run(dev);
+		rkispp_stop_3a_run(dev);
 		if (dev->stream_vdev.fec.is_end &&
 		    (dev->dev_id != dev->hw_dev->cur_dev_id || dev->hw_dev->is_idle))
 			is_wait = false;
@@ -1781,6 +1778,8 @@ static int start_isp(struct rkispp_device *dev)
 	} else if (atomic_read(&vdev->refcnt) > 1) {
 		return 0;
 	}
+
+	rkispp_start_3a_run(dev);
 
 	mutex_lock(&dev->hw_dev->dev_lock);
 
