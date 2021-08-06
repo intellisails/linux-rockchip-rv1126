@@ -120,8 +120,8 @@
 		reg = <0x63>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&strobe_input>;
-		gpio-encc1-gpios = <&gpio2 RK_PB1 GPIO_ACTIVE_HIGH>;
-		gpio-encc2-gpios = <&gpio2 RK_PB2 GPIO_ACTIVE_HIGH>;
+		gpio-encc1-gpios = <&gpio2 RK_PB2 GPIO_ACTIVE_HIGH>;
+		gpio-encc2-gpios = <&gpio2 RK_PB1 GPIO_ACTIVE_HIGH>;
 	};
 
 	ov9281: ov9281@60 {
