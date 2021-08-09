@@ -2188,7 +2188,7 @@
 	};
 
 	rkvenc: rkvenc@ffbb0000 {
-		compatible = "rockchip,rkv-encoder-v1";
+		compatible = "rockchip,rkv-encoder-rv1126", "rockchip,rkv-encoder-v1";
 		reg = <0xffbb0000 0x400>;
 		interrupts = <GIC_SPI 68 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "irq_enc";
