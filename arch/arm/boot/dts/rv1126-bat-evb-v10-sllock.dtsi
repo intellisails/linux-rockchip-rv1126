@@ -115,6 +115,11 @@
 		status = "disabled";
 	};
 
+	gt24c1024:gt24c1024@50{
+		compatible = "atmel,24c1024";
+		reg = <0x50>;
+	};
+
 	rk803:rk803@63{
 		compatible = "rockchip,rk803";
 		reg = <0x63>;
