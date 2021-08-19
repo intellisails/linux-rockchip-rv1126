@@ -657,6 +657,10 @@ static void rkisp_dev_trigger_handle(struct rkisp_device *dev, u32 cmd)
 		isp = hw->isp[id];
 		rkisp_csi_trigger_event(isp, T_CMD_DEQUEUE, &t);
 		isp->dmarx_dev.pre_frame = isp->dmarx_dev.cur_frame;
+		if (t.frame_id > isp->dmarx_dev.pre_frame.id &&
+		    t.frame_id - isp->dmarx_dev.pre_frame.id > 1)
+			isp->isp_sdev.dbg.frameloss +=
+				t.frame_id - isp->dmarx_dev.pre_frame.id + 1;
 		isp->dmarx_dev.cur_frame.id = t.frame_id;
 		isp->dmarx_dev.cur_frame.sof_timestamp = t.sof_timestamp;
 		isp->dmarx_dev.cur_frame.timestamp = t.frame_timestamp;
