@@ -3127,10 +3127,6 @@ static void isp_hdrtmo_wait_first_line(struct rkisp_isp_params_vdev *params_vdev
 		else
 			break;
 	} while (retry-- > 0);
-
-	if (retry < 0)
-		dev_err(params_vdev->dev->dev, "hdr line_cnt(%d) < 1line\n",
-			line_cnt);
 }
 
 static void
