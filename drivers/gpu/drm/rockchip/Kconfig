@@ -27,12 +27,19 @@ config ROCKCHIP_DRM_DEBUG
 	  debug node: /d/dri/0/ff900000.vop/vop_dump/dump
 	  cat /d/dri/0/ff900000.vop/vop_dump/dump get more help.
 
+config ROCKCHIP_PSR
+	bool
+	help
+	  If you want to enable PSR function on Rockchip SoC, you
+	  should select this option.
+
 config ROCKCHIP_ANALOGIX_DP
 	bool "Rockchip specific extensions for Analogix DP driver"
+	select ROCKCHIP_PSR
 	help
 	  This selects support for Rockchip SoC specific extensions
 	  for the Analogix Core DP driver. If you want to enable DP
-	  on RK3288 based SoC, you should selet this option.
+	  on RK3288 based SoC, you should select this option.
 
 config ROCKCHIP_CDN_DP
         bool "Rockchip cdn DP"
