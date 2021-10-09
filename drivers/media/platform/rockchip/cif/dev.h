@@ -448,6 +448,7 @@ struct rkcif_stream {
 	bool				is_line_inten;
 	bool				is_can_stop;
 	bool				is_buf_active;
+	bool				is_high_align;
 };
 
 struct rkcif_lvds_subdev {

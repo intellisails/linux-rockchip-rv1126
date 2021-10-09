@@ -1943,7 +1943,10 @@ static int rkcif_csi_channel_set(struct rkcif_stream *stream,
 		else
 			val &= ~LVDS_COMPACT;
 	}
-
+	if (stream->is_high_align)
+		val |= CSI_ENABLE_MIPI_HIGH_ALIGN;
+	else
+		val &= ~CSI_ENABLE_MIPI_HIGH_ALIGN;
 	rkcif_write_register(dev, get_reg_index_of_id_ctrl0(channel->id), val);
 
 	return 0;
@@ -2947,6 +2950,11 @@ static int rkcif_stream_start(struct rkcif_stream *stream)
 	      | stream->cif_fmt_in->dvp_fmt_val
 	      | xfer_mode | yc_swap | multi_id_en
 	      | multi_id_sel | multi_id_mode | bt1120_edge_mode;
+
+	if (stream->is_high_align)
+		val |= CIF_HIGH_ALIGN;
+	else
+		val &= ~CIF_HIGH_ALIGN;
 	rkcif_write_register(dev, CIF_REG_DVP_FOR, val);
 
 	val = stream->pixm.width;
@@ -3417,6 +3425,8 @@ void rkcif_stream_init(struct rkcif_device *dev, u32 id)
 	else
 		stream->is_compact = false;
 
+	stream->is_high_align = false;
+
 	if (dev->chip_id == CHIP_RV1126_CIF ||
 	    dev->chip_id == CHIP_RV1126_CIF_LITE)
 		stream->extend_line.is_extended = true;
@@ -3849,42 +3859,33 @@ err:
 	return -EINVAL;
 }
 
-static int rkcif_g_ctrl(struct file *file, void *fh,
-			   struct v4l2_control *ctrl)
+static long rkcif_ioctl_default(struct file *file, void *fh,
+				    bool valid_prio, unsigned int cmd, void *arg)
 {
 	struct rkcif_stream *stream = video_drvdata(file);
 
-	switch (ctrl->id) {
-	case V4L2_CID_CIF_DATA_COMPACT:
-		if (stream->is_compact)
-			ctrl->value = CSI_MEM_COMPACT;
-		else
-			ctrl->value = CSI_MEM_BYTE_LE;
+	switch (cmd) {
+	case RKCIF_CMD_GET_CSI_MEMORY_MODE:
+		if (stream->is_compact) {
+			*(int *)arg = CSI_LVDS_MEM_COMPACT;
+		} else {
+			if (stream->is_high_align)
+				*(int *)arg = CSI_LVDS_MEM_WORD_HIGH_ALIGN;
+			else
+				*(int *)arg = CSI_LVDS_MEM_WORD_LOW_ALIGN;
+		}
 		break;
-	default:
-		return -EINVAL;
-	}
-
-	return 0;
-}
-
-static int rkcif_s_ctrl(struct file *file, void *fh,
-			   struct v4l2_control *ctrl)
-{
-	struct rkcif_stream *stream = video_drvdata(file);
-	struct rkcif_device *dev = stream->cifdev;
-
-	if (stream->state == RKCIF_STATE_STREAMING) {
-		v4l2_err(&dev->v4l2_dev, "set failed, the stream is streaming\n");
-		return -EBUSY;
-	}
-
-	switch (ctrl->id) {
-	case V4L2_CID_CIF_DATA_COMPACT:
-		if (ctrl->value == CSI_LVDS_MEM_COMPACT)
+	case RKCIF_CMD_SET_CSI_MEMORY_MODE:
+		if (*(int *)arg == CSI_LVDS_MEM_COMPACT) {
 			stream->is_compact = true;
-		else
+			stream->is_high_align = false;
+		} else if (*(int *)arg == CSI_LVDS_MEM_WORD_HIGH_ALIGN) {
 			stream->is_compact = false;
+			stream->is_high_align = true;
+		} else {
+			stream->is_compact = false;
+			stream->is_high_align = false;
+		}
 		break;
 	default:
 		return -EINVAL;
@@ -3916,8 +3917,7 @@ static const struct v4l2_ioctl_ops rkcif_v4l2_ioctl_ops = {
 	.vidioc_g_selection = rkcif_g_selection,
 	.vidioc_enum_frameintervals = rkcif_enum_frameintervals,
 	.vidioc_enum_framesizes = rkcif_enum_framesizes,
-	.vidioc_g_ctrl = rkcif_g_ctrl,
-	.vidioc_s_ctrl = rkcif_s_ctrl,
+	.vidioc_default = rkcif_ioctl_default,
 };
 
 static void rkcif_unregister_stream_vdev(struct rkcif_stream *stream)
