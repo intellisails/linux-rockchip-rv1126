@@ -692,6 +692,7 @@ static int mmc_read_ext_csd(struct mmc_card *card)
 #ifdef CONFIG_ROCKCHIP_THUNDER_BOOT
 	void *ecsd = NULL;
 	bool valid_ecsd = false;
+	bool valid_reserved = false;
 	struct device_node *mem;
 	struct resource reg;
 	struct device *dev = card->host->parent;
@@ -707,6 +708,7 @@ static int mmc_read_ext_csd(struct mmc_card *card)
 			dev_err(dev, "fail to get resource\n");
 			goto get_ecsd;
 		}
+		valid_reserved = true;
 
 		ecsd = mmc_tb_map_ecsd(reg.start, resource_size(&reg));
 		if (!ecsd)
@@ -758,6 +760,10 @@ decode:
 		kfree(ext_csd);
 	else
 		vunmap(ecsd);
+	if (valid_reserved)
+		free_reserved_area(phys_to_virt(reg.start),
+				   phys_to_virt(reg.start) + resource_size(&reg),
+				   -1, "memory-region-ecsd");
 #else
 	kfree(ext_csd);
 #endif
