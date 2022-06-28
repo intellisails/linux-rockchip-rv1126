@@ -45,7 +45,7 @@
 
 static inline int is_dma_buf_file(struct file *);
 
-#if !defined(CONFIG_DMABUF_CACHE)
+#ifdef CONFIG_ARCH_ROCKCHIP
 struct dma_buf_callback {
 	struct list_head list;
 	void (*callback)(void *);
@@ -98,7 +98,7 @@ static struct file_system_type dma_buf_fs_type = {
 static int dma_buf_release(struct inode *inode, struct file *file)
 {
 	struct dma_buf *dmabuf;
-#if !defined(CONFIG_DMABUF_CACHE)
+#ifdef CONFIG_ARCH_ROCKCHIP
 	struct dma_buf_callback *cb, *tmp;
 #endif
 	int dtor_ret = 0;
@@ -120,7 +120,7 @@ static int dma_buf_release(struct inode *inode, struct file *file)
 	 */
 	BUG_ON(dmabuf->cb_shared.active || dmabuf->cb_excl.active);
 
-#if !defined(CONFIG_DMABUF_CACHE)
+#ifdef CONFIG_ARCH_ROCKCHIP
 	mutex_lock(&dmabuf->release_lock);
 	list_for_each_entry_safe(cb, tmp, &dmabuf->release_callbacks, list) {
 		if (cb->callback)
@@ -509,7 +509,7 @@ err_alloc_file:
 	return file;
 }
 
-#if !defined(CONFIG_DMABUF_CACHE)
+#ifdef CONFIG_ARCH_ROCKCHIP
 void *dma_buf_get_release_callback_data(struct dma_buf *dmabuf,
 					void (*callback)(void *))
 {
@@ -664,7 +664,7 @@ struct dma_buf *dma_buf_export(const struct dma_buf_export_info *exp_info)
 	spin_lock_init(&dmabuf->name_lock);
 	INIT_LIST_HEAD(&dmabuf->attachments);
 
-#if !defined(CONFIG_DMABUF_CACHE)
+#ifdef CONFIG_ARCH_ROCKCHIP
 	mutex_init(&dmabuf->release_lock);
 	INIT_LIST_HEAD(&dmabuf->release_callbacks);
 #endif
