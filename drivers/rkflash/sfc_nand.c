@@ -1183,7 +1183,8 @@ u32 sfc_nand_init(void)
 	sfc_nand_dev.prog_lines = DATA_LINES_X1;
 	sfc_nand_dev.page_read_cmd = 0x03;
 	sfc_nand_dev.page_prog_cmd = 0x02;
-	sfc_nand_dev.recheck_buffer = kmalloc(SFC_NAND_PAGE_MAX_SIZE, GFP_KERNEL | GFP_DMA);
+	if (!sfc_nand_dev.recheck_buffer)
+		sfc_nand_dev.recheck_buffer = kmalloc(SFC_NAND_PAGE_MAX_SIZE, GFP_KERNEL | GFP_DMA);
 	if (!sfc_nand_dev.recheck_buffer) {
 		pr_err("%s recheck_buffer alloc failed\n", __func__);
 		return -ENOMEM;
