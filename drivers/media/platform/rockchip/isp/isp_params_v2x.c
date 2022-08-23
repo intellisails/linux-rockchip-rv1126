@@ -3520,7 +3520,7 @@ isp_3dlut_config(struct rkisp_isp_params_vdev *params_vdev,
 		data[i] = (arg->lut_b[i] & 0x3FF) |
 			  (arg->lut_g[i] & 0xFFF) << 10 |
 			  (arg->lut_r[i] & 0x3FF) << 22;
-
+	rkisp_prepare_buffer(params_vdev->dev, &priv_val->buf_3dlut[buf_idx]);
 	value = priv_val->buf_3dlut[buf_idx].dma_addr;
 	rkisp_iowrite32(params_vdev, value, MI_LUT_3D_RD_BASE);
 	rkisp_iowrite32(params_vdev, arg->actual_size, MI_LUT_3D_RD_WSIZE);
@@ -3604,6 +3604,7 @@ isp_ldch_config(struct rkisp_isp_params_vdev *params_vdev,
 		if (dev->csi_dev.rd_mode == HDR_RDBK_FRAME1)
 			vsize += cnt;
 	}
+	rkisp_prepare_buffer(dev, &priv_val->buf_ldch[buf_idx]);
 	value = priv_val->buf_ldch[buf_idx].dma_addr + ldch_head->data_oft;
 	rkisp_iowrite32(params_vdev, value, MI_LUT_LDCH_RD_BASE);
 	rkisp_iowrite32(params_vdev, arg->hsize, MI_LUT_LDCH_RD_H_WSIZE);
@@ -3625,6 +3626,8 @@ isp_ldch_enable(struct rkisp_isp_params_vdev *params_vdev,
 			dev_err(dev->dev, "no ldch buffer allocated\n");
 			return;
 		}
+		if (rkisp_ioread32(params_vdev, ISP_3DLUT_UPDATE))
+			isp_param_clear_bits(params_vdev, ISP_3DLUT_UPDATE, 0x01);
 		isp_param_set_bits(params_vdev, ISP_LDCH_STS, 0x01);
 	} else {
 		isp_param_clear_bits(params_vdev, ISP_LDCH_STS, 0x01);

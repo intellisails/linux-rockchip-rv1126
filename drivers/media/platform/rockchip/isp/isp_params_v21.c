@@ -622,7 +622,7 @@ isp_lsc_matrix_cfg_ddr(struct rkisp_isp_params_vdev *params_vdev,
 				0);
 		vaddr[3][index[3]++] = data;
 	}
-
+	rkisp_prepare_buffer(params_vdev->dev, &priv_val->buf_lsclut[buf_idx]);
 	data = priv_val->buf_lsclut[buf_idx].dma_addr;
 	rkisp_iowrite32(params_vdev, data, MI_LUT_LSC_RD_BASE);
 	rkisp_iowrite32(params_vdev, RKISP_PARAM_LSC_LUT_BUF_SIZE, MI_LUT_LSC_RD_WSIZE);
@@ -2742,7 +2742,7 @@ isp_3dlut_config(struct rkisp_isp_params_vdev *params_vdev,
 		data[i] = (arg->lut_b[i] & 0x3FF) |
 			  (arg->lut_g[i] & 0xFFF) << 10 |
 			  (arg->lut_r[i] & 0x3FF) << 22;
-
+	rkisp_prepare_buffer(params_vdev->dev, &priv_val->buf_3dlut[buf_idx]);
 	value = priv_val->buf_3dlut[buf_idx].dma_addr;
 	rkisp_iowrite32(params_vdev, value, MI_LUT_3D_RD_BASE);
 	rkisp_iowrite32(params_vdev, arg->actual_size, MI_LUT_3D_RD_WSIZE);
@@ -2814,7 +2814,7 @@ isp_ldch_config(struct rkisp_isp_params_vdev *params_vdev,
 	ldch_head = (struct isp2x_ldch_head *)priv_val->buf_ldch[buf_idx].vaddr;
 	ldch_head->stat = LDCH_BUF_CHIPINUSE;
 	priv_val->buf_ldch_idx = buf_idx;
-
+	rkisp_prepare_buffer(dev, &priv_val->buf_ldch[buf_idx]);
 	value = priv_val->buf_ldch[buf_idx].dma_addr + ldch_head->data_oft;
 	rkisp_iowrite32(params_vdev, value, MI_LUT_LDCH_RD_BASE);
 	rkisp_iowrite32(params_vdev, arg->hsize, MI_LUT_LDCH_RD_H_WSIZE);
