@@ -5435,8 +5435,6 @@ static int rkcif_streamoff_in_reset(struct rkcif_device *cif_dev,
 					v4l2_err(&cif_dev->v4l2_dev, "quick stream off subdev:%s failed\n",
 						 p->subdevs[i]->name);
 			}
-		} else {
-			ret = v4l2_subdev_call(p->subdevs[i], video, s_stream, on);
 		}
 
 		if (ret)
@@ -5518,8 +5516,6 @@ static int rkcif_streamon_in_reset(struct rkcif_device *cif_dev,
 						 "quick stream on subdev:%s failed\n",
 						 p->subdevs[i]->name);
 			}
-		} else {
-			ret = v4l2_subdev_call(p->subdevs[i], video, s_stream, on);
 		}
 
 		if (ret)
