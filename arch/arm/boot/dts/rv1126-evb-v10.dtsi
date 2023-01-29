@@ -79,7 +79,7 @@
 	};
 
 	cam_ircut0: cam_ircut {
-		status = "okay";
+		status = "disabled";
 		compatible = "rockchip,ircut";
 		ircut-open-gpios = <&gpio2 RK_PA7 GPIO_ACTIVE_HIGH>;
 		ircut-close-gpios  = <&gpio2 RK_PA6 GPIO_ACTIVE_HIGH>;
