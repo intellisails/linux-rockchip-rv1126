@@ -1681,6 +1681,7 @@ static void rkispp_destroy_buf(struct rkispp_stream *stream)
 static void rkispp_stream_stop(struct rkispp_stream *stream)
 {
 	struct rkispp_device *dev = stream->isppdev;
+	unsigned long lock_flags = 0;
 	bool is_wait = true;
 	int ret = 0;
 
@@ -1688,14 +1689,16 @@ static void rkispp_stream_stop(struct rkispp_stream *stream)
 	if (atomic_read(&dev->stream_vdev.refcnt) == 1) {
 		v4l2_subdev_call(&dev->ispp_sdev.sd, video, s_stream, false);
 		rkispp_stop_3a_run(dev);
+		spin_lock_irqsave(&dev->hw_dev->buf_lock, lock_flags);
 		if (dev->stream_vdev.fec.is_end &&
 		    (dev->dev_id != dev->hw_dev->cur_dev_id || dev->hw_dev->is_idle))
 			is_wait = false;
+		spin_unlock_irqrestore(&dev->hw_dev->buf_lock, lock_flags);
 	}
 	if (is_wait) {
 		ret = wait_event_timeout(stream->done,
 					 !stream->streaming,
-					 msecs_to_jiffies(500));
+					 msecs_to_jiffies(300));
 		if (!ret)
 			v4l2_warn(&dev->v4l2_dev,
 				  "stream:%d stop timeout\n", stream->id);
@@ -1780,7 +1783,7 @@ static void rkispp_stop_streaming(struct vb2_queue *queue)
 		hw->is_first = true;
 	}
 	v4l2_dbg(1, rkispp_debug, &dev->v4l2_dev,
-		 "%s id:%d exit\n", __func__, stream->id);
+		 "%s id:%d exit, idle:%d\n", __func__, stream->id, hw->is_idle);
 }
 
 static int start_isp(struct rkispp_device *dev)
@@ -2652,7 +2655,8 @@ static void fec_work_event(struct rkispp_device *dev,
 			for (val = STREAM_S0; val <= STREAM_S2; val++) {
 				stream = &vdev->stream[val];
 				if (stream->streaming && stream->stopping) {
-					if (stream->ops->is_stopped(stream)) {
+					if (stream->ops->is_stopped(stream) &&
+					    (atomic_read(&dev->stream_vdev.refcnt) > 1)) {
 						stream->stopping = false;
 						stream->streaming = false;
 						wake_up(&stream->done);
@@ -2974,7 +2978,8 @@ static void nr_work_event(struct rkispp_device *dev,
 			stream = &vdev->stream[val];
 			/* check scale stream stop state */
 			if (stream->streaming && stream->stopping) {
-				if (stream->ops->is_stopped(stream)) {
+				if (stream->ops->is_stopped(stream) &&
+				    (atomic_read(&dev->stream_vdev.refcnt) > 1)) {
 					stream->stopping = false;
 					stream->streaming = false;
 					wake_up(&stream->done);
@@ -3464,8 +3469,7 @@ void rkispp_module_work_event(struct rkispp_device *dev,
 	if (is_isr && !buf_rd && !buf_wr &&
 	    ((!is_fec_en && module == ISPP_MODULE_NR) ||
 	     (is_fec_en &&
-	      ((module == ISPP_MODULE_NR && (is_single ||
-		vdev->fec.is_end)) ||
+	      ((module == ISPP_MODULE_NR && (is_single || vdev->fec.is_end)) ||
 	       (module == ISPP_MODULE_FEC && !is_single && vdev->fec.is_end))))) {
 		dev->stream_vdev.monitor.retry = 0;
 		rkispp_soft_reset(dev->hw_dev);
@@ -3480,8 +3484,6 @@ void rkispp_module_work_event(struct rkispp_device *dev,
 				v4l2_subdev_call(dev->ispp_sdev.remote_sd,
 						 video, s_rx_buffer, buf, NULL);
 		}
-		if (!dev->hw_dev->is_idle)
-			dev->hw_dev->is_idle = true;
 	}
 }
 
@@ -3561,6 +3563,8 @@ void rkispp_isr(u32 mis_val, struct rkispp_device *dev)
 			stream->stopping = false;
 			stream->streaming = false;
 			stream->is_upd = false;
+			if (atomic_read(&dev->stream_vdev.refcnt) == 1)
+				dev->ispp_sdev.state = ISPP_STOP;
 			wake_up(&stream->done);
 		} else if (i != STREAM_II) {
 			rkispp_frame_end(stream, FRAME_IRQ);
