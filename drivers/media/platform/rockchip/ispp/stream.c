@@ -2390,7 +2390,9 @@ static void restart_module(struct rkispp_device *dev)
 	monitor->retry++;
 	v4l2_dbg(1, rkispp_debug, &dev->v4l2_dev,
 		 "%s enter\n", __func__);
-	if (dev->ispp_sdev.state == ISPP_STOP || monitor->retry > 3) {
+	if (dev->ispp_sdev.state == ISPP_STOP ||
+	    monitor->retry > 3 ||
+	    dev->hw_dev->is_shutdown) {
 		monitor->is_restart = false;
 		monitor->is_en = false;
 		goto end;
@@ -2398,7 +2400,7 @@ static void restart_module(struct rkispp_device *dev)
 	if (monitor->monitoring_module)
 		wait_for_completion_timeout(&monitor->cmpl,
 					    msecs_to_jiffies(500));
-	if (dev->ispp_sdev.state == ISPP_STOP) {
+	if (dev->ispp_sdev.state == ISPP_STOP || dev->hw_dev->is_shutdown) {
 		monitor->is_restart = false;
 		monitor->is_en = false;
 		goto end;
@@ -2491,8 +2493,10 @@ static void restart_monitor(struct work_struct *work)
 			time = (m_monitor->time <= 0 ? 300 : m_monitor->time) + 150;
 		ret = wait_for_completion_timeout(&m_monitor->cmpl,
 						  msecs_to_jiffies(time));
-		if (dev->hw_dev->is_shutdown || dev->ispp_sdev.state == ISPP_STOP)
+		if (dev->hw_dev->is_shutdown || dev->ispp_sdev.state == ISPP_STOP) {
+			monitor->is_en = false;
 			break;
+		}
 		if (!(monitor->monitoring_module & m_monitor->module) ||
 		    ret || !monitor->is_en)
 			continue;

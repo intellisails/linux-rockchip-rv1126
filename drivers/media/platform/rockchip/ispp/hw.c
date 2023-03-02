@@ -377,6 +377,18 @@ static void rkispp_hw_shutdown(struct platform_device *pdev)
 
 	hw_dev->is_shutdown = true;
 	if (pm_runtime_active(&pdev->dev)) {
+		struct rkispp_monitor *monitor;
+		int i, timeout;
+
+		for (i = 0; i < hw_dev->dev_num; i++) {
+			monitor = &hw_dev->ispp[i]->stream_vdev.monitor;
+			timeout = 20;
+			while (timeout--) {
+				if (!(monitor->is_en && monitor->is_restart))
+					break;
+				udelay(300);
+			}
+		}
 		writel(0, hw_dev->base_addr + RKISPP_CTRL_INT_MSK);
 		writel(GLB_SOFT_RST_ALL, hw_dev->base_addr + RKISPP_CTRL_RESET);
 	}
