@@ -1,0 +1,18 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2020 Rockchip Electronics Co., Ltd.
+ */
+
+/dts-v1/;
+
+#include "rv1126-38x38-intellisails.dts"
+
+/ {
+	model = "IntelliSails RV1109 38x38 Board";
+	compatible = "intellisails,rv1109-38x38", "rockchip,rv1109";
+
+	chosen {
+		bootargs = "earlycon=uart8250,mmio32,0xff570000 console=ttyFIQ0 root=/dev/mmcblk0p4 rootfstype=ext4 rootwait snd_aloop.index=7";
+	};
+
+};

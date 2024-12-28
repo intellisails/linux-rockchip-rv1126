@@ -62,7 +62,7 @@
 #define IMX415_MAX_PIXEL_RATE		(MIPI_FREQ_891M / 10 * 2 * IMX415_4LANES)
 #define OF_CAMERA_HDR_MODE		"rockchip,camera-hdr-mode"
 
-#define IMX415_XVCLK_FREQ_37M		37125000
+#define IMX415_XVCLK_FREQ_37M		18562500//37125000
 
 /* TODO: Get the real chip id from reg */
 #define CHIP_ID				0xE0
