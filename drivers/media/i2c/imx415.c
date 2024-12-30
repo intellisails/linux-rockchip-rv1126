@@ -62,7 +62,7 @@
 #define IMX415_MAX_PIXEL_RATE		(MIPI_FREQ_891M / 10 * 2 * IMX415_4LANES)
 #define OF_CAMERA_HDR_MODE		"rockchip,camera-hdr-mode"
 
-#define IMX415_XVCLK_FREQ_37M		18562500//37125000
+#define IMX415_XVCLK_FREQ_37M		37125000
 
 /* TODO: Get the real chip id from reg */
 #define CHIP_ID				0xE0
@@ -627,9 +627,9 @@ static __maybe_unused const struct regval imx415_linear_10bit_3864x2192_891M_reg
 	{0x3020, 0x00},
 	{0x3021, 0x00},
 	{0x3022, 0x00},
-	{0x3024, 0x35},
-	{0x3025, 0x09},
-	{0x3028, 0x1A},
+	{0x3024, 0xCA},
+	{0x3025, 0x08},
+	{0x3028, 0x4C},
 	{0x3029, 0x04},
 	{0x302C, 0x00},
 	{0x302D, 0x00},
@@ -736,6 +736,45 @@ static __maybe_unused const struct regval imx415_hdr2_12bit_1932x1096_891M_regs[
 	{REG_NULL, 0x00},
 };
 
+static __maybe_unused const struct regval imx415_linear_10bit_1932x1096_891M_regs[] = {
+	{0x3020, 0x01},
+	{0x3021, 0x01},
+	{0x3022, 0x01},
+	{0x3024, 0xCA},
+	{0x3025, 0x08},
+	{0x3028, 0x26},
+	{0x3029, 0x02},
+	{0x302C, 0x00},
+	{0x302D, 0x00},
+	{0x3031, 0x00},
+	{0x3033, 0x05},
+	{0x3050, 0x08},
+	{0x3051, 0x00},
+	{0x3054, 0x19},
+	{0x3058, 0x3E},
+	{0x3060, 0x25},
+	{0x3064, 0x4A},
+	{0x30CF, 0x00},
+	{0x30D9, 0x02},
+	{0x30DA, 0x01},
+	{0x3118, 0xC0},
+	{0x3260, 0x01},
+	{0x3701, 0x00},
+	{0x400C, 0x00},
+	{0x4018, 0x7F},
+	{0x401A, 0x37},
+	{0x401C, 0x37},
+	{0x401E, 0xF7},
+	{0x401F, 0x00},
+	{0x4020, 0x3F},
+	{0x4022, 0x6F},
+	{0x4024, 0x3F},
+	{0x4026, 0x5F},
+	{0x4028, 0x2F},
+	{0x4074, 0x01},
+	{REG_NULL, 0x00},
+};
+
 /*
  * The width and height must be configured to be
  * the same as the current output resolution of the sensor.
@@ -762,8 +801,8 @@ static const struct imx415_mode supported_modes[] = {
 			.denominator = 300000,
 		},
 		.exp_def = 0x08ca - 0x08,
-		.hts_def = 0x041a * IMX415_4LANES * 2,
-		.vts_def = 0x0935,
+		.hts_def = 0x044c * IMX415_4LANES * 2,
+		.vts_def = 0x08ca,
 		.global_reg_list = imx415_global_10bit_3864x2192_regs,
 		.reg_list = imx415_linear_10bit_3864x2192_891M_regs,
 		.hdr_mode = NO_HDR,
@@ -954,6 +993,23 @@ static const struct imx415_mode supported_modes[] = {
 		.vc[PAD1] = V4L2_MBUS_CSI2_CHANNEL_0,//L->csi wr0
 		.vc[PAD2] = V4L2_MBUS_CSI2_CHANNEL_1,
 		.vc[PAD3] = V4L2_MBUS_CSI2_CHANNEL_1,//M->csi wr2
+	},
+	{
+		.bus_fmt = MEDIA_BUS_FMT_SGBRG10_1X10,
+		.width = 1944,
+		.height = 1097,
+		.max_fps = {
+			.numerator = 10000,
+			.denominator = 300000,
+		},
+		.exp_def = 0x08ca - 0x08,
+		.hts_def = 0x0226 * 3,
+		.vts_def = 0x08ca,
+		.global_reg_list = imx415_global_10bit_3864x2192_regs,
+		.reg_list = imx415_linear_10bit_1932x1096_891M_regs,
+		.hdr_mode = NO_HDR,
+		.mipi_freq_idx = 0,
+		.bpp = 10,
 	},
 };
 

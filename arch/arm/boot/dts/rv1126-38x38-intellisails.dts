@@ -16,7 +16,6 @@
 		bootargs = "earlycon=uart8250,mmio32,0xff570000 console=ttyFIQ0 root=PARTUUID=614e0000-0000 rootfstype=squashfs rootwait snd_aloop.index=7";
 	};
 
-	/delete-node/ vdd-npu;
 	/delete-node/ vdd-vepu;
 
 	vcc_1v8: vcc-1v8 {
@@ -26,15 +25,6 @@
 		regulator-boot-on;
 		regulator-min-microvolt = <1800000>;
 		regulator-max-microvolt = <1800000>;
-	};
-
-	vcc_2v8: vcc-2v8 {
-		compatible = "regulator-fixed";
-		regulator-name = "vcc_2v8";
-		regulator-boot-on;
-		regulator-always-on;
-		regulator-min-microvolt = <2800000>;
-		regulator-max-microvolt = <2800000>;
 	};
 
 	vcc_dvdd: vcc-dvdd {
@@ -69,17 +59,16 @@
 	};
 
 	vdd_arm: vdd-arm {
-		// compatible = "pwm-regulator";
-		compatible = "regulator-fixed";
-		// pwms = <&pwm0 0 5000 1>;
+		compatible = "pwm-regulator";
+		pwms = <&pwm0 0 5000 1>;
 		regulator-name = "vdd_arm";
-		regulator-min-microvolt = <720000>;
+		regulator-min-microvolt = <725000>;
 		regulator-max-microvolt = <1000000>;
-		regulator-init-microvolt = <825000>;
+		regulator-init-microvolt = <900000>;
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-settling-time-up-us = <250>;
-		pwm-supply = <&vcc3v3_sys>;
+		pwm-supply = <&vcc5v0_sys>;
 		status = "okay";
 	};
 
@@ -90,7 +79,6 @@
 	vdd_logic_npu_vepu: vdd-logic-npu-vepu {
 		// compatible = "pwm-regulator";
 		compatible = "regulator-fixed";
-		// pwms = <&pwm1 0 5000 1>;
 		regulator-name = "vdd_logic_npu_vepu";
 		regulator-min-microvolt = <720000>;
 		regulator-max-microvolt = <880000>;
@@ -167,6 +155,38 @@
 		WIFI,poweren_gpio = <&gpio0 RK_PC0 GPIO_ACTIVE_HIGH>;
 		status = "okay";
 	};
+
+	vcc_2v8: vcc-2v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "vcc_2v8";
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <2800000>;
+		regulator-max-microvolt = <2800000>;
+	};
+
+	gpio_i2c: gpio_i2c {
+		status = "okay";
+		compatible = "i2c-gpio";
+		scl-gpios = <&gpio1 RK_PC2 GPIO_ACTIVE_HIGH>;
+		sda-gpios = <&gpio1 RK_PC3 GPIO_ACTIVE_HIGH>;
+		i2c-gpio,delay-us = <2>;	/* ~100 kHz */
+		#address-cells = <1>;
+		#size-cells = <0>;
+	};
+};
+
+&gpio_i2c{
+	aw20xxx: aw20xxx@3a {
+		status = "okay";
+		compatible = "FAN,AW20XXX";
+		reg = <0x3a>;
+		irq-gpio = <&gpio1 RK_PC1 GPIO_ACTIVE_LOW>;
+	};
+};
+
+&vdd_npu {
+		pwms = <&pwm1 0 5000 1>;
 };
 
 &csi_dphy0 {
@@ -179,12 +199,6 @@
 			reg = <0>;
 			#address-cells = <1>;
 			#size-cells = <0>;
-
-			mipi_in_ucam2: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&ucam_out2>;
-				data-lanes = <4>;
-			};
 		};
 		port@1 {
 			reg = <1>;
@@ -193,8 +207,7 @@
 
 			csidphy0_out: endpoint@0 {
 				reg = <0>;
-				remote-endpoint = <&cif_mipi_in>;
-				data-lanes = <4>;
+				remote-endpoint = <&mipi_csi2_input>;
 			};
 		};
 	};
@@ -246,36 +259,6 @@
 	};
 };
 
-&i2c1 {
-	status = "okay";
-	clock-frequency = <400000>;
-
-	imx415: imx415@10 {
-		compatible = "sony,imx415";
-		reg = <0x10>;
-		clocks = <&cru CLK_MIPICSI_OUT>;
-		clock-names = "xvclk";
-		power-domains = <&power RV1126_PD_VI>;
-		power-gpios = <&gpio1 RK_PD4 GPIO_ACTIVE_HIGH>; // power-gpios = <0x55 0x1c 0x00>;
-		pinctrl-names = "rockchip,camera_default";
-		pinctrl-0 = <&mipicsi_clk0>;
-		avdd-supply = <&vcc_2v8>;
-		dovdd-supply = <&vcc_1v8>;
-		dvdd-supply = <&vcc_dvdd>;
-		reset-gpios = <&gpio1 RK_PD6 GPIO_ACTIVE_LOW>; // reset-gpios = <0x55 0x1e 0x01>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "front";
-		rockchip,camera-module-name = "YT10092";
-		rockchip,camera-module-lens-name = "IR0147-36IRC-8M-F20";
-		port {
-			ucam_out2: endpoint {
-				remote-endpoint = <&mipi_in_ucam2>;
-				data-lanes = <4>;
-			};
-		};
-	};
-};
-
 &i2c4 {
 	status = "okay";
 	clock-frequency = <400000>;
@@ -309,7 +292,7 @@
 };
 
 &isp_reserved {
-	size = <0x8000000>;
+	size = <0x0AC00000>;
 };
 
 &mdio {
@@ -320,17 +303,42 @@
 };
 
 &mipi_csi2 {
-	status = "disabled";
+	status = "okay";
+
+	ports {
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		port@0 {
+			reg = <0>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_csi2_input: endpoint@1 {
+				reg = <1>;
+				remote-endpoint = <&csidphy0_out>;
+				data-lanes = <1 2 3 4>;
+			};
+		};
+
+		port@1 {
+			reg = <1>;
+			#address-cells = <1>;
+			#size-cells = <0>;
+
+			mipi_csi2_output: endpoint@0 {
+				reg = <0>;
+				remote-endpoint = <&cif_mipi_in>;
+				data-lanes = <1 2 3 4>;
+			};
+		};
+	};
 };
 
 &npu {
-	npu-supply = <&vdd_logic_npu_vepu_fixed>;
+	npu-supply = <&vdd_npu>;
 };
 
-&npu_opp_table {
-	/delete-node/ opp-800000000;
-	/delete-node/ opp-934000000;
-};
 
 &pinctrl {
 	es8311 {
@@ -353,10 +361,10 @@
 	pmuio0-supply = <&vcc3v3_sys>;
 	pmuio1-supply = <&vcc3v3_sys>;
 	vccio2-supply = <&vcc3v3_sys>;
-	vccio3-supply = <&vcc3v3_sys>;
+	vccio3-supply = <&vcc_1v8>;
 	vccio4-supply = <&vcc_1v8>;
 	vccio5-supply = <&vcc3v3_sys>;
-	vccio6-supply = <&vcc3v3_sys>;
+	vccio6-supply = <&vcc_1v8>;
 	vccio7-supply = <&vcc3v3_sys>;
 };
 
@@ -380,8 +388,8 @@
 	port {
 		/* MIPI CSI-2 endpoint */
 		cif_mipi_in: endpoint {
-			remote-endpoint = <&csidphy0_out>;
-			data-lanes = <4>;
+			remote-endpoint = <&mipi_csi2_output>;
+			data-lanes = <1 2 3 4>;
 		};
 	};
 };
@@ -416,7 +424,7 @@
 };
 
 &rkvenc {
-	venc-supply = <&vdd_logic_npu_vepu_fixed>;
+	venc-supply = <&vdd_npu>;
 };
 
 &rockchip_suspend {
