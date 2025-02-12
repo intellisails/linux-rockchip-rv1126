@@ -77,8 +77,8 @@
 	 * use fixed regulator to avoid voltage adjustment by software
 	 */
 	vdd_logic_npu_vepu: vdd-logic-npu-vepu {
-		// compatible = "pwm-regulator";
-		compatible = "regulator-fixed";
+		compatible = "pwm-regulator";
+		pwms = <&pwm1 0 5000 1>;
 		regulator-name = "vdd_logic_npu_vepu";
 		regulator-min-microvolt = <720000>;
 		regulator-max-microvolt = <880000>;
@@ -183,10 +183,6 @@
 		reg = <0x3a>;
 		irq-gpio = <&gpio1 RK_PC1 GPIO_ACTIVE_LOW>;
 	};
-};
-
-&vdd_npu {
-		pwms = <&pwm1 0 5000 1>;
 };
 
 &csi_dphy0 {
@@ -337,8 +333,16 @@
 
 &npu {
 	npu-supply = <&vdd_npu>;
+	status = "okay";
 };
 
+&npu_tsadc {
+	status = "okay";
+};
+
+&rkvenc {
+	venc-supply = <&vdd_npu>;
+};
 
 &pinctrl {
 	es8311 {
@@ -421,10 +425,6 @@
 			};
 		};
 	};
-};
-
-&rkvenc {
-	venc-supply = <&vdd_npu>;
 };
 
 &rockchip_suspend {
