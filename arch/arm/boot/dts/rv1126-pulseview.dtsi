@@ -88,51 +88,6 @@
 	};
 };
 
-&display_subsystem {
-	status = "okay";
-};
-
-/*
- * Userland need drm buffer, so keep display_subsystem and vop enabled,
- * But dsi can be disabled.
- */
-&dsi {
-	status = "disabled";
-};
-
-&csi_dphy0 {
-	status = "okay";
-
-	ports {
-		#address-cells = <1>;
-		#size-cells = <0>;
-		port@0 {
-			reg = <0>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			mipi_in_ucam2: endpoint@1 {
-				reg = <1>;
-				remote-endpoint = <&ucam_out2>;
-				data-lanes = <4>;
-				bus-type = <3>;
-			};
-		};
-		port@1 {
-			reg = <1>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			csidphy0_out: endpoint@0 {
-				reg = <0>;
-				remote-endpoint = <&cif_mipi_in>;
-				data-lanes = <4>;
-				bus-type = <3>;
-			};
-		};
-	};
-};
-
 &cpu0 {
 	cpu-supply = <&vdd_arm>;
 };
@@ -173,8 +128,11 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&rgmiim0_miim &rgmiim0_bus2 &rgmiim0_bus4 &clkm0_out_ethernet>;
 
-	tx_delay = <0x2a>;
-	rx_delay = <0x1a>;
+	// tx_delay = <0x2a>;
+	// rx_delay = <0x1a>;
+
+	tx_delay = <0x3d>;
+	rx_delay = <0x2e>;
 
 	phy-handle = <&phy>;
 	status = "okay";
@@ -246,18 +204,26 @@
 		};
 
 		regulators {
-			vdd_logic: DCDC_REG1 {
+			vdd_npu_vepu: DCDC_REG1 {
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-min-microvolt = <725000>;
-				regulator-max-microvolt = <1350000>;
+				regulator-min-microvolt = <650000>;
+				regulator-max-microvolt = <950000>;
 				regulator-ramp-delay = <6001>;
 				regulator-initial-mode = <0x2>;
-				regulator-name = "vdd_logic";
+				regulator-name = "vdd_npu_vepu";
 				regulator-state-mem {
-					regulator-on-in-suspend;
-					regulator-suspend-microvolt = <800000>;
+					regulator-off-in-suspend;
 				};
+			};
+
+			vdd_logic: vdd-logic {
+				compatible = "regulator-fixed";
+				regulator-name = "vdd_logic";
+				regulator-always-on;
+				regulator-boot-on;
+				egulator-min-microvolt = <810000>;
+				regulator-max-microvolt = <810000>;
 			};
 
 			vdd_arm: DCDC_REG2 {
@@ -431,38 +397,6 @@
 	};
 };
 
-&i2c1 {
-	status = "okay";
-	clock-frequency = <400000>;
-
-	imx415: imx415@10 {
-		compatible = "sony,imx415";
-		reg = <0x10>;
-		clocks = <&cru CLK_MIPICSI_OUT>;
-		clock-names = "xvclk";
-		power-domains = <&power RV1126_PD_VI>;
-		pinctrl-names = "rockchip,camera_default";
-		pinctrl-0 = <&mipicsi_clk0>;
-		avdd-supply = <&vcc3v3_sys>;
-		dovdd-supply = <&vcc_1v8>;
-		dvdd-supply = <&vcc_dvdd>;
-		reset-gpios = <&gpio1 RK_PD0 GPIO_ACTIVE_LOW>;
-		// power-gpios = <&gpio1 RK_PD4 GPIO_ACTIVE_HIGH>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "front";
-		rockchip,camera-module-name = "YT10092";
-		rockchip,camera-module-lens-name = "IR0147-36IRC-8M-F20";
-		ir-cut = <&cam_ircut0>;
-		port {
-			ucam_out2: endpoint {
-				remote-endpoint = <&mipi_in_ucam2>;
-				data-lanes = <4>;
-				bus-type = <3>;
-			};
-		};
-	};
-};
-
 &i2s0_8ch {
 	status = "okay";
 	#sound-dai-cells = <0>;
@@ -491,6 +425,10 @@
 	};
 };
 
+&mipi_dphy {
+	status = "okay";
+};
+
 &mpp_srv {
 	status = "okay";
 };
@@ -511,6 +449,7 @@
 };
 
 &npu {
+	npu-supply = <&vdd_npu_vepu>;
 	status = "okay";
 };
 
@@ -620,72 +559,6 @@
 	status = "okay";
 };
 
-&rkcif {
-	status = "okay";
-};
-
-&rkcif_mmu {
-	status = "disabled";
-};
-
-&rkcif_mipi_lvds {
-	status = "okay";
-
-	port {
-		cif_mipi_in: endpoint {
-			remote-endpoint = <&csidphy0_out>;
-			data-lanes = <4>;
-			bus-type = <3>;
-		};
-	};
-};
-
-&rkcif_mipi_lvds_sditf {
-	status = "okay";
-
-	port {
-		mipi_lvds_sditf: endpoint {
-			remote-endpoint = <&isp_in>;
-			data-lanes = <4>;
-		};
-	};
-};
-
-&rkisp_vir0 {
-	status = "okay";
-
-	ports {
-		port@0 {
-			reg = <0>;
-			#address-cells = <1>;
-			#size-cells = <0>;
-
-			isp_in: endpoint@0 {
-				reg = <0>;
-				remote-endpoint = <&mipi_lvds_sditf>;
-			};
-		};
-	};
-};
-
-&rkisp_mmu {
-	status = "disabled";
-};
-
-&rkispp {
-	status = "okay";
-	/* the max input w h and fps of mulit sensor */
-	//max-input = <2688 1520 30>;
-};
-
-&rkispp_vir0 {
-	status = "okay";
-};
-
-&rkispp_mmu {
-	status = "okay";
-};
-
 &rkvdec {
 	status = "okay";
 };
@@ -695,7 +568,18 @@
 };
 
 &rkvenc {
+	venc-supply = <&vdd_npu_vepu>;
 	status = "okay";
+};
+
+&rkvenc_opp_table {
+	/*
+	 * max IR-drop values on different freq condition for this board!
+	 */
+	rockchip,board-irdrop = <
+	     /* MHz	MHz	uV */
+		500	594	50000
+	>;
 };
 
 &rkvenc_mmu {
