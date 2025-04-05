@@ -31,15 +31,6 @@
         };
     };
 
-	cam_ircut0: cam_ircut {
-		status = "disabled";
-		compatible = "rockchip,ircut";
-		ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
-		ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "front";
-	};
-
 	dummy_codec: dummy-codec {
 		compatible = "rockchip,dummy-codec";
 		#sound-dai-cells = <0>;
@@ -523,27 +514,6 @@
 	vccio7-supply = <&vcc_1v8>;
 };
 
-// P_IRIS/ZOOM/FOCUS_AIN2
-&pwm0 {
-	status = "okay";
-	pinctrl-names = "active";
-	pinctrl-0 = <&pwm0m1_pins>;
-};
-
-// P_IRIS/ZOOM/FOCUS_AIN1
-&pwm1 {
-	status = "okay";
-	pinctrl-names = "active";
-	pinctrl-0 = <&pwm1m1_pins>;
-};
-
-// P_IRIS/ZOOM/FOCUS_BIN1
-&pwm7 {
-	status = "okay";
-	pinctrl-names = "active";
-	pinctrl-0 = <&pwm7m1_pins>;
-};
-
 // P_IRIS/ZOOM/FOCUS_BIN2
 &pwm11 {
 	status = "okay";
@@ -647,8 +617,10 @@
 };
 
 &uart4 {
+	// dma-names = "tx", "rx";
 	pinctrl-names = "default";
-	pinctrl-0 = <&uart4m1_xfer &uart4m1_ctsn>;
+	pinctrl-0 = <&uart4m1_xfer>;
+	// pinctrl-0 = <&uart4m1_xfer &uart4m1_ctsn &uart4m1_rtsn>;
 	status = "okay";
 };
 

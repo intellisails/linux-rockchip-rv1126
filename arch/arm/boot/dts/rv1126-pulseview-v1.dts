@@ -23,6 +23,15 @@
 		regulator-min-microvolt = <2800000>;
 		regulator-max-microvolt = <2800000>;
 	};
+
+	cam_ircut0: cam_ircut {
+		status = "okay";
+		compatible = "rockchip,ircut";
+		ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
+		ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";
+	};
 };
 
 &csi_dphy0 {
