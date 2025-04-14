@@ -7,30 +7,6 @@
 #include <dt-bindings/input/input.h>
 
 / {
-	gpio-leds {
-        compatible = "gpio-leds";
-
-        ir_led {
-            label = "ovopark:red:ir_led";
-            gpios = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
-            linux,default-trigger = "none";
-        };
-    };
-
-	key-reset {
-        compatible = "gpio-keys";
-
-        pinctrl-names = "default";
-        pinctrl-0 = <&soft_rst>;
-
-        reset {
-            label = "reset";
-            gpios = <&gpio2 RK_PC7 GPIO_ACTIVE_LOW>;
-            linux,code = <KEY_RESTART>;
-            linux,input-type = <EV_KEY>;
-        };
-    };
-
 	dummy_codec: dummy-codec {
 		compatible = "rockchip,dummy-codec";
 		#sound-dai-cells = <0>;
