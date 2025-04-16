@@ -284,6 +284,8 @@ static int ircut_s_ctrl(struct v4l2_ctrl *ctrl)
 	struct ircut_dev *ircut = container_of(ctrl->handler,
 					     struct ircut_dev, ctrl_handler);
 
+	printk(KERN_ERR "ircut_s_ctrl: target=%d, id = %d, val = %d\n", V4L2_CID_BAND_STOP_FILTER, ctrl->id, ctrl->val);
+
 	if (ctrl->id == V4L2_CID_BAND_STOP_FILTER) {
 		ret = ircut_operation(ircut, ctrl->val);
 		if (ret == 0)
