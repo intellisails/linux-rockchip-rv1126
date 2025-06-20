@@ -24,14 +24,28 @@
 		regulator-max-microvolt = <2800000>;
 	};
 
-	cam_ircut0: cam_ircut {
+	// cam_ircut0: cam_ircut {
+	// 	status = "okay";
+	// 	compatible = "rockchip,ircut";
+	// 	led-gpios  = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
+	// 	ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
+	// 	ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
+	// 	rockchip,camera-module-index = <1>;
+	// 	rockchip,camera-module-facing = "front";
+	// };
+
+	i2s1_sound: i2s1-sound {
 		status = "okay";
-		compatible = "rockchip,ircut";
-		led-gpios  = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
-		ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
-		ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
-		rockchip,camera-module-index = <1>;
-		rockchip,camera-module-facing = "front";
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,name = "rockchip,i2s1-sound";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s1_2ch>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&es8311>;
+		};
 	};
 };
 
@@ -88,13 +102,44 @@
 		rockchip,camera-module-lens-name = "IR0147-36IRC-8M-F20";
 		// NO_HDR:0 HDR_X2:5 HDR_X3:6
 		rockchip,camera-hdr-mode = <6>;
-		ir-cut = <&cam_ircut0>;
+		// ir-cut = <&cam_ircut0>;
 		port {
 			ucam_out0: endpoint {
 				remote-endpoint = <&mipi_in_ucam0>;
 				data-lanes = <1 2 3 4>;
 			};
 		};
+	};
+};
+
+&i2s1_2ch {
+	status = "okay";
+	rockchip,clk-trcm = <1>;
+	#sound-dai-cells = <0>;
+	pinctrl-0 = <&i2s1m2_sclk
+		     &i2s1m2_lrck
+		     &i2s1m2_sdi
+		     &i2s1m2_sdo>;
+};
+
+&i2c2 {
+	status = "okay";
+	clock-frequency = <400000>;
+	pinctrl-0 = <&i2c2_xfer>;
+
+	es8311: es8311@18 {
+		compatible = "everest,es8311";
+		reg = <0x18>;
+		clocks = <&cru MCLK_I2S1_OUT2IO>;
+		clock-names = "mclk";
+		adc-volume = <0xbf>;  /* 0dB */
+		dac-volume = <0xbf>;  /* 0dB */
+		aec-mode = "dac left, adc right";
+		pinctrl-names = "default";
+		pinctrl-0 = <&i2s1m2_mclk>;
+		assigned-clocks = <&cru MCLK_I2S1_OUT2IO>;
+		assigned-clock-parents = <&cru MCLK_I2S1>;
+		#sound-dai-cells = <0>;
 	};
 };
 
