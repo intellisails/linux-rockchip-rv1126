@@ -588,8 +588,16 @@
 	status = "okay";
 	u2phy_otg: otg-port {
 		status = "okay";
-		rockchip,vbus-always-on;
 	};
+};
+
+&usbdrd {
+	status = "okay";
+};
+
+&usbdrd_dwc3 {
+	status = "okay";
+	extcon = <&u2phy0>;
 };
 
 &u2phy1 {

@@ -40,6 +40,12 @@
 		simple-audio-card,format = "i2s";
 		simple-audio-card,mclk-fs = <256>;
 		simple-audio-card,name = "rockchip,i2s1-sound";
+		// simple-audio-card,widgets =
+		// 	"Microphone", "Mic Jack",
+		// 	"Speaker", "Speaker Jack";
+		// simple-audio-card,routing =
+		// 	"Speaker Jack", "HPOL",
+		// 	"Speaker Jack", "HPOR";
 		simple-audio-card,cpu {
 			sound-dai = <&i2s1_2ch>;
 		};
@@ -114,8 +120,9 @@
 
 &i2s1_2ch {
 	status = "okay";
-	rockchip,clk-trcm = <1>;
+	// rockchip,clk-trcm = <1>;
 	#sound-dai-cells = <0>;
+	pinctrl-names = "default";
 	pinctrl-0 = <&i2s1m2_sclk
 		     &i2s1m2_lrck
 		     &i2s1m2_sdi
@@ -136,9 +143,11 @@
 		dac-volume = <0xbf>;  /* 0dB */
 		aec-mode = "dac left, adc right";
 		pinctrl-names = "default";
-		pinctrl-0 = <&i2s1m2_mclk>;
+		pinctrl-0 = <&i2s1m2_mclk>; // &spk_ctl
 		assigned-clocks = <&cru MCLK_I2S1_OUT2IO>;
 		assigned-clock-parents = <&cru MCLK_I2S1>;
+		// assigned-clock-rates = <12288000>;
+		// spk-ctl-gpios = <&gpio2 RK_PA5 GPIO_ACTIVE_HIGH>;
 		#sound-dai-cells = <0>;
 	};
 };
@@ -245,4 +254,12 @@
 
 &rkispp_mmu {
 	status = "okay";
+};
+
+&pinctrl {
+	es8311 {
+		// spk_ctl: spk-ctl {
+		// 	rockchip,pins = <2 RK_PA5 0 &pcfg_pull_none>;
+		// };
+	};
 };
