@@ -564,6 +564,9 @@ static int es8311_regs_init(struct snd_soc_component *component)
 	/* ensure select Mic1p-Mic1n by default. */
 	snd_soc_component_update_bits(component, ES8311_SYSTEM_REG14,
 				      0x30, 0x10);
+	/* set HPSW, enable output to HP drive */
+    snd_soc_component_update_bits(component, ES8311_SYSTEM_REG13,
+                      0x30, 0x10);
 
 	return 0;
 }
