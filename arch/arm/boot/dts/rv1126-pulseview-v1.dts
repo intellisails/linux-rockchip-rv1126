@@ -24,15 +24,15 @@
 		regulator-max-microvolt = <2800000>;
 	};
 
-	// cam_ircut0: cam_ircut {
-	// 	status = "okay";
-	// 	compatible = "rockchip,ircut";
-	// 	led-gpios  = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
-	// 	ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
-	// 	ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
-	// 	rockchip,camera-module-index = <1>;
-	// 	rockchip,camera-module-facing = "front";
-	// };
+	cam_ircut0: cam_ircut {
+		status = "okay";
+		compatible = "rockchip,ircut";
+		led-gpios  = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
+		ircut-open-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
+		ircut-close-gpios  = <&gpio0 RK_PB7 GPIO_ACTIVE_HIGH>;
+		rockchip,camera-module-index = <1>;
+		rockchip,camera-module-facing = "front";
+	};
 
 	i2s1_sound: i2s1-sound {
 		status = "okay";
@@ -108,7 +108,7 @@
 		rockchip,camera-module-lens-name = "IR0147-36IRC-8M-F20";
 		// NO_HDR:0 HDR_X2:5 HDR_X3:6
 		rockchip,camera-hdr-mode = <6>;
-		// ir-cut = <&cam_ircut0>;
+		ir-cut = <&cam_ircut0>;
 		port {
 			ucam_out0: endpoint {
 				remote-endpoint = <&mipi_in_ucam0>;
