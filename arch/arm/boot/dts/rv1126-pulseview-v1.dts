@@ -104,8 +104,10 @@
 		// power-gpios = <&gpio1 RK_PD4 GPIO_ACTIVE_HIGH>;
 		rockchip,camera-module-index = <1>;
 		rockchip,camera-module-facing = "front";
-		rockchip,camera-module-name = "YT10092";
-		rockchip,camera-module-lens-name = "IR0147-36IRC-8M-F20";
+		rockchip,camera-module-name = "PV1";
+		rockchip,camera-module-lens-name = "8M";
+		// imx415_PV1_8M.xml
+		// imx415_PV1_8M-hdr3.xml
 		// NO_HDR:0 HDR_X2:5 HDR_X3:6
 		rockchip,camera-hdr-mode = <6>;
 		ir-cut = <&cam_ircut0>;
