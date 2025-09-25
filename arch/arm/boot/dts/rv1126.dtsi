@@ -2222,7 +2222,7 @@
 		nvmem-cell-names = "leakage", "performance";
 
 		rockchip,temp-freq-table = <
-			80000	500000
+			98000	500000
 			100000	396000
 		>;
 
@@ -2431,8 +2431,8 @@
 		nvmem-cell-names = "leakage", "performance";
 
 		rockchip,temp-freq-table = <
-			80000	600000
-			90000	396000
+			98000	600000
+			99000	396000
 			100000	300000
 		>;
 
