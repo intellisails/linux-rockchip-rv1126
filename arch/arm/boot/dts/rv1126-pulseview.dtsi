@@ -498,6 +498,18 @@
 	pinctrl-0 = <&pwm11m1_pins>;
 };
 
+&dmc {
+	status = "okay";
+};
+
+&dfi {
+	status = "okay";
+};
+
+&dmcdbg {
+	status = "okay";
+};
+
 &ramoops {
 	status = "okay";
 };
