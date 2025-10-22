@@ -174,8 +174,10 @@
 			vdd_npu_vepu: DCDC_REG1 {
 				regulator-always-on;
 				regulator-boot-on;
-				regulator-min-microvolt = <725000>;
-				regulator-max-microvolt = <1350000>;
+				regulator-min-microvolt = <950000>;
+				regulator-max-microvolt = <950000>;
+				// regulator-min-microvolt = <725000>;
+				// regulator-max-microvolt = <1350000>;
 				regulator-ramp-delay = <6001>;
 				regulator-initial-mode = <0x2>;
 				regulator-name = "vdd_npu_vepu";
@@ -498,17 +500,17 @@
 	pinctrl-0 = <&pwm11m1_pins>;
 };
 
-&dmc {
-	status = "okay";
-};
+// &dmc {
+// 	status = "okay";
+// };
 
-&dfi {
-	status = "okay";
-};
+// &dfi {
+// 	status = "okay";
+// };
 
-&dmcdbg {
-	status = "okay";
-};
+// &dmcdbg {
+// 	status = "okay";
+// };
 
 &ramoops {
 	status = "okay";
